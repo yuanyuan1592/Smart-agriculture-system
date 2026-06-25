@@ -1,11 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
+from datetime import datetime
 from app.schemas import FieldCreate, FieldUpdate, FieldResponse
 
 router = APIRouter()
 
 # 临时存储数据（实际应使用数据库）
 fields_db = []
+
+
+def now_iso():
+    return datetime.utcnow()
 
 
 @router.get("/", response_model=List[FieldResponse])
@@ -26,8 +31,11 @@ async def get_field(field_id: int):
 @router.post("/", response_model=FieldResponse)
 async def create_field(field: FieldCreate):
     """创建农田"""
+    current_time = now_iso()
     new_field = {
         "id": len(fields_db) + 1,
+        "created_at": current_time,
+        "updated_at": current_time,
         **field.model_dump()
     }
     fields_db.append(new_field)
@@ -41,6 +49,7 @@ async def update_field(field_id: int, field: FieldUpdate):
         if f.get("id") == field_id:
             update_data = field.model_dump(exclude_unset=True)
             fields_db[idx].update(update_data)
+            fields_db[idx]["updated_at"] = now_iso()
             return fields_db[idx]
     raise HTTPException(status_code=404, detail="Farm field not found")
 
