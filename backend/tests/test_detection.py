@@ -4,14 +4,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.routes.field import fields_db
-from app.routes.detection import build_detection_report
+from app.services.field_service import field_store
+from app.services.detection_service import build_detection_report
 
 
 class DetectionReportTest(unittest.TestCase):
     def setUp(self):
-        fields_db.clear()
-        fields_db.extend(
+        field_store._fields.clear()
+        field_store._fields.extend(
             [
                 {
                     "id": 1,
@@ -39,7 +39,7 @@ class DetectionReportTest(unittest.TestCase):
         )
 
     def test_build_detection_report_flags_alerts(self):
-        report = build_detection_report(fields_db)
+        report = build_detection_report(field_store._fields)
 
         self.assertEqual(report["summary"]["total_fields"], 2)
         self.assertEqual(report["summary"]["warning_count"], 2)

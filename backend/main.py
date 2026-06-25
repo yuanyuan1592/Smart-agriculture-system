@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import config
 from app.routes import router
 
 app = FastAPI(
     title="智慧农业系统 API",
     description="Smart Agriculture Management System",
-    version="1.0.0"
+    version="1.0.0",
+    debug=config.debug,
 )
 
 # 配置 CORS

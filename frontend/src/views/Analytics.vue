@@ -41,7 +41,7 @@
 
 <script>
 import { defineComponent, computed, onMounted } from 'vue'
-import { useFieldStore } from '../stores/field'
+import { useFieldStore } from '../modules/fields/store'
 
 export default defineComponent({
   name: 'Analytics',

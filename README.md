@@ -1,37 +1,34 @@
 # 智慧农业管理系统
 
-一个基于 FastAPI 和 Vue 3 的现代智慧农业管理解决方案，已补齐农业检测模块。
+一个基于 FastAPI 与 Vue 3 的智慧农业管理平台，当前已具备模块化结构，便于后续持续扩展新功能。
 
 ## 项目结构
 
-```
+```text
 smart-agriculture/
-├── backend/           # FastAPI 后端
+├── backend/
 │   ├── app/
-│   │   ├── models/    # 数据模型
-│   │   ├── routes/    # API 路由
-│   │   └── schemas/   # 数据验证模式
-│   ├── main.py        # 应用入口
-│   └── requirements.txt
-└── frontend/          # Vue 3 前端
-    ├── src/
-    │   ├── views/      # 页面
-    │   ├── stores/     # 状态管理
-    │   ├── router/     # 路由配置
-    │   ├── App.vue
-    │   └── main.js
-    ├── index.html
-    ├── package.json
-    └── vite.config.js
+│   │   ├── core/          # 配置与注册中心
+│   │   ├── modules/       # 功能模块目录
+│   │   ├── routes/        # API 路由
+│   │   ├── schemas/       # 请求/响应模型
+│   │   └── services/      # 业务服务层
+│   └── main.py
+├── frontend/
+│   ├── src/
+│   │   ├── modules/       # 前端模块目录
+│   │   ├── services/      # API 服务层
+│   │   ├── stores/        # 兼容入口
+│   │   ├── views/         # 页面组件
+│   │   └── router/        # 路由
+└── README.md
 ```
 
-## 功能特性
+## 当前已实现功能
 
-- 🌾 农田信息管理
-- 📊 实时数据监测（土壤湿度、温度等）
-- 📈 数据分析和统计
-- 🔔 农业检测与异常预警
-- 📱 响应式设计
+- 农田管理
+- 数据分析
+- 农业检测与预警
 
 ## 安装和运行
 
@@ -73,25 +70,10 @@ npm run dev
 
 前端将运行在 http://localhost:5173
 
-## 新增农业检测能力
+## 扩展建议
 
-- 新增检测接口：GET /api/detection/
-- 根据土壤湿度和温度生成预警
-- 页面入口位于“农业检测”导航
-- 支持显示总农田、预警项、严重风险和健康农田数量
-
-## API 文档
-
-### 农田管理 API
-
-- GET /api/fields - 获取所有农田
-- GET /api/fields/{id} - 获取特定农田
-- POST /api/fields - 创建农田
-- PUT /api/fields/{id} - 更新农田
-- DELETE /api/fields/{id} - 删除农田
-
-### 农业检测 API
-
-- GET /api/detection/ - 获取农业检测报告
-
-FastAPI 会自动生成交互式 API 文档，访问 http://localhost:8000/docs
+新增功能时建议按以下顺序进行：
+1. 在 backend/app/modules 下新增模块目录
+2. 在 backend/app/routes 下增加路由
+3. 在 frontend/src/modules 下增加模块状态与服务
+4. 在 frontend/src/views 下新增页面

@@ -1,64 +1,46 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
-from datetime import datetime
 from app.schemas import FieldCreate, FieldUpdate, FieldResponse
+from app.modules.fields.service import FieldsModuleService
 
 router = APIRouter()
-
-# 临时存储数据（实际应使用数据库）
-fields_db = []
-
-
-def now_iso():
-    return datetime.utcnow()
 
 
 @router.get("/", response_model=List[FieldResponse])
 async def get_fields():
     """获取所有农田"""
-    return fields_db
+    return FieldsModuleService.list_fields()
 
 
 @router.get("/{field_id}", response_model=FieldResponse)
 async def get_field(field_id: int):
     """获取特定农田"""
-    for field in fields_db:
-        if field.get("id") == field_id:
-            return field
-    raise HTTPException(status_code=404, detail="Farm field not found")
+    field = FieldsModuleService.get_field(field_id)
+    if field is None:
+        raise HTTPException(status_code=404, detail="Farm field not found")
+    return field
 
 
 @router.post("/", response_model=FieldResponse)
 async def create_field(field: FieldCreate):
     """创建农田"""
-    current_time = now_iso()
-    new_field = {
-        "id": len(fields_db) + 1,
-        "created_at": current_time,
-        "updated_at": current_time,
-        **field.model_dump()
-    }
-    fields_db.append(new_field)
-    return new_field
+    return FieldsModuleService.create_field(field.model_dump())
 
 
 @router.put("/{field_id}", response_model=FieldResponse)
 async def update_field(field_id: int, field: FieldUpdate):
     """更新农田"""
-    for idx, f in enumerate(fields_db):
-        if f.get("id") == field_id:
-            update_data = field.model_dump(exclude_unset=True)
-            fields_db[idx].update(update_data)
-            fields_db[idx]["updated_at"] = now_iso()
-            return fields_db[idx]
-    raise HTTPException(status_code=404, detail="Farm field not found")
+    update_data = field.model_dump(exclude_unset=True)
+    updated_field = FieldsModuleService.update_field(field_id, update_data)
+    if updated_field is None:
+        raise HTTPException(status_code=404, detail="Farm field not found")
+    return updated_field
 
 
 @router.delete("/{field_id}")
 async def delete_field(field_id: int):
     """删除农田"""
-    for idx, f in enumerate(fields_db):
-        if f.get("id") == field_id:
-            fields_db.pop(idx)
-            return {"message": "Field deleted successfully"}
-    raise HTTPException(status_code=404, detail="Farm field not found")
+    deleted = FieldsModuleService.delete_field(field_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Farm field not found")
+    return {"message": "Field deleted successfully"}

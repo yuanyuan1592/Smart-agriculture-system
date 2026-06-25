@@ -3,32 +3,32 @@
     <h2>农业检测</h2>
     <p class="subtitle">根据土壤湿度和温度自动生成异常预警，帮助你快速判断农田状态。</p>
 
-    <div v-if="loading" class="state">加载中...</div>
-    <div v-else-if="error" class="state error">{{ error }}</div>
+    <div v-if="detectionStore.loading" class="state">加载中...</div>
+    <div v-else-if="detectionStore.error" class="state error">{{ detectionStore.error }}</div>
     <div v-else class="content">
       <div class="summary-grid">
         <div class="card">
           <h3>总农田</h3>
-          <p class="value">{{ report.summary.total_fields }}</p>
+          <p class="value">{{ detectionStore.report.summary.total_fields }}</p>
         </div>
         <div class="card warning">
           <h3>预警项</h3>
-          <p class="value">{{ report.summary.warning_count }}</p>
+          <p class="value">{{ detectionStore.report.summary.warning_count }}</p>
         </div>
         <div class="card critical">
           <h3>严重风险</h3>
-          <p class="value">{{ report.summary.critical_count }}</p>
+          <p class="value">{{ detectionStore.report.summary.critical_count }}</p>
         </div>
         <div class="card healthy">
           <h3>健康农田</h3>
-          <p class="value">{{ report.summary.healthy_count }}</p>
+          <p class="value">{{ detectionStore.report.summary.healthy_count }}</p>
         </div>
       </div>
 
       <div class="alert-list">
         <h3>检测结果</h3>
-        <div v-if="report.alerts.length === 0" class="empty">当前暂无异常，农田状态整体良好。</div>
-        <div v-for="item in report.alerts" :key="item.field_name + item.title" class="alert-item" :class="item.type">
+        <div v-if="detectionStore.report.alerts.length === 0" class="empty">当前暂无异常，农田状态整体良好。</div>
+        <div v-for="item in detectionStore.report.alerts" :key="item.field_name + item.title" class="alert-item" :class="item.type">
           <div>
             <strong>{{ item.field_name }}</strong>
             <p>{{ item.title }}</p>
@@ -41,37 +41,20 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, ref } from 'vue'
-import axios from 'axios'
+import { defineComponent, onMounted } from 'vue'
+import { useDetectionStore } from '../modules/detection/store'
 
 export default defineComponent({
   name: 'Detection',
   setup() {
-    const report = ref({ summary: {}, alerts: [] })
-    const loading = ref(false)
-    const error = ref('')
-
-    const fetchReport = async () => {
-      loading.value = true
-      error.value = ''
-      try {
-        const response = await axios.get('http://localhost:8000/api/detection/')
-        report.value = response.data
-      } catch (err) {
-        error.value = err.message || '获取检测报告失败'
-      } finally {
-        loading.value = false
-      }
-    }
+    const detectionStore = useDetectionStore()
 
     onMounted(() => {
-      fetchReport()
+      detectionStore.fetchReport()
     })
 
     return {
-      report,
-      loading,
-      error,
+      detectionStore,
     }
   }
 })
