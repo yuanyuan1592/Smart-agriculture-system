@@ -6,6 +6,7 @@
         <router-link to="/">首页</router-link>
         <router-link to="/fields">农田管理</router-link>
         <router-link to="/analytics">数据分析</router-link>
+        <router-link to="/detection">农业检测</router-link>
       </nav>
     </header>
     
