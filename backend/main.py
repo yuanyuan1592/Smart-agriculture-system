@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import config
-from app.routes import router
+from app.core.router import register_routes
 
 app = FastAPI(
     title="智慧农业系统 API",
@@ -19,8 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 包含路由
-app.include_router(router)
+# 注册模块化路由
+register_routes(app)
 
 
 @app.get("/")

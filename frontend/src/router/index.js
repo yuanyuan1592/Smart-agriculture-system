@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import FieldManagement from '../views/FieldManagement.vue'
-import Analytics from '../views/Analytics.vue'
-import Detection from '../views/Detection.vue'
+import FieldManagement from '../modules/fields/FieldManagement.vue'
+import Analytics from '../modules/analytics/Analytics.vue'
+import Detection from '../modules/detection/Detection.vue'
 
 const routes = [
   {

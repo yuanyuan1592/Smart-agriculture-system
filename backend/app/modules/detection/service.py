@@ -1,5 +1,5 @@
-from app.services.detection_service import build_detection_report
-from app.services.field_service import field_store
+from app.common.detection_report import build_detection_report
+from app.common.field_store import field_store
 
 
 class DetectionModuleService:

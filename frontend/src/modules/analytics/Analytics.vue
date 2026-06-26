@@ -2,10 +2,12 @@
   <div class="analytics">
     <h2>数据分析</h2>
     
-    <div class="stats-grid">
+    <div v-if="analyticsStore.loading" class="state">加载中...</div>
+  <div v-else-if="analyticsStore.error" class="state error">{{ analyticsStore.error }}</div>
+  <div v-else class="stats-grid">
       <div class="stat-card">
         <h3>总农田数</h3>
-        <p class="stat-value">{{ fieldStore.fields.length }}</p>
+        <p class="stat-value">{{ analyticsStore.summary.total_fields || 0 }}</p>
       </div>
       
       <div class="stat-card">
@@ -24,7 +26,7 @@
       </div>
     </div>
 
-    <div class="crops-analysis">
+    <div v-if="!analyticsStore.loading && !analyticsStore.error" class="crops-analysis">
       <h3>作物分布</h3>
       <div class="crop-list">
         <div v-for="crop in cropDistribution" :key="crop.type" class="crop-item">
@@ -41,51 +43,34 @@
 
 <script>
 import { defineComponent, computed, onMounted } from 'vue'
-import { useFieldStore } from '../modules/fields/store'
+import { useAnalyticsStore } from './store'
 
 export default defineComponent({
   name: 'Analytics',
   setup() {
-    const fieldStore = useFieldStore()
+    const analyticsStore = useAnalyticsStore()
 
-    const averageArea = computed(() => {
-      if (fieldStore.fields.length === 0) return 0
-      const total = fieldStore.fields.reduce((sum, f) => sum + f.area, 0)
-      return (total / fieldStore.fields.length).toFixed(2)
-    })
-
-    const averageMoisture = computed(() => {
-      if (fieldStore.fields.length === 0) return 0
-      const total = fieldStore.fields.reduce((sum, f) => sum + f.soil_moisture, 0)
-      return (total / fieldStore.fields.length).toFixed(2)
-    })
-
-    const averageTemperature = computed(() => {
-      if (fieldStore.fields.length === 0) return 0
-      const total = fieldStore.fields.reduce((sum, f) => sum + f.temperature, 0)
-      return (total / fieldStore.fields.length).toFixed(2)
-    })
+    const averageArea = computed(() => analyticsStore.summary.average_area || 0)
+    const averageMoisture = computed(() => analyticsStore.summary.average_moisture || 0)
+    const averageTemperature = computed(() => analyticsStore.summary.average_temperature || 0)
 
     const cropDistribution = computed(() => {
-      const crops = {}
-      fieldStore.fields.forEach(field => {
-        crops[field.crop_type] = (crops[field.crop_type] || 0) + 1
-      })
-
-      const total = fieldStore.fields.length
-      return Object.entries(crops).map(([type, count]) => ({
+      const distribution = analyticsStore.summary.crop_distribution || {}
+      return Object.entries(distribution).map(([type, count]) => ({
         type,
         count,
-        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+        percentage: analyticsStore.summary.total_fields
+          ? Math.round((count / analyticsStore.summary.total_fields) * 100)
+          : 0
       }))
     })
 
     onMounted(() => {
-      fieldStore.fetchFields()
+      analyticsStore.fetchSummary()
     })
 
     return {
-      fieldStore,
+      analyticsStore,
       averageArea,
       averageMoisture,
       averageTemperature,

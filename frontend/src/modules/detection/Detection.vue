@@ -42,7 +42,7 @@
 
 <script>
 import { defineComponent, onMounted } from 'vue'
-import { useDetectionStore } from '../modules/detection/store'
+import { useDetectionStore } from './store'
 
 export default defineComponent({
   name: 'Detection',

@@ -1,4 +1,4 @@
-from app.services.field_service import field_store
+from app.common.field_store import field_store
 
 
 class FieldsModuleService:

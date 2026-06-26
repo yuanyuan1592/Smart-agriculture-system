@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi uvicorn
+
+      - name: Validate backend Python syntax
+        run: |
+          python -m py_compile backend/main.py backend/app/core/router.py backend/app/routes/__init__.py backend/app/modules/fields/routes.py backend/app/modules/detection/routes.py backend/app/modules/analytics/routes.py backend/app/common/field_store.py backend/app/common/detection_report.py backend/app/modules/fields/service.py backend/app/modules/detection/service.py backend/app/modules/analytics/service.py
+
+      - name: Run backend tests
+        run: |
+          python -m pip install pytest
+          pytest backend/tests
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build

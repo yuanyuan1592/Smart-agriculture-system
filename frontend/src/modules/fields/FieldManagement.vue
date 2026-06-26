@@ -66,7 +66,7 @@
 
 <script>
 import { defineComponent, ref, onMounted } from 'vue'
-import { useFieldStore } from '../modules/fields/store'
+import { useFieldStore } from './store'
 
 export default defineComponent({
   name: 'FieldManagement',
