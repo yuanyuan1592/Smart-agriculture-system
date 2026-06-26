@@ -3,29 +3,71 @@ from typing import Any, Dict, List
 
 def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
     """公共检测报告生成器。"""
-    total_fields = len(fields)
-    if total_fields == 0:
-        return {
-            "total_fields": 0,
-            "average_moisture": 0,
-            "average_temperature": 0,
-            "field_status": []
-        }
+    summary = {
+        "total_fields": 0,
+        "warning_count": 0,
+        "critical_count": 0,
+        "healthy_count": 0,
+    }
+    alerts: List[Dict[str, Any]] = []
 
-    total_moisture = sum(field.get("soil_moisture", 0) for field in fields)
-    total_temperature = sum(field.get("temperature", 0) for field in fields)
-    field_status = [
-        {
-            "id": field.get("id"),
-            "name": field.get("name"),
-            "status": field.get("status", "normal")
-        }
-        for field in fields
-    ]
+    def get_status(field_data: Dict[str, Any]) -> str:
+        moisture = field_data.get("soil_moisture", 0)
+        temperature = field_data.get("temperature", 0)
+        if moisture < 30 or temperature < 15 or temperature > 35:
+            return "warning"
+        if moisture > 70:
+            return "alert"
+        return "normal"
+
+    for field in fields:
+        summary["total_fields"] += 1
+        status = get_status(field)
+
+        if status == "normal":
+            summary["healthy_count"] += 1
+        else:
+            summary["warning_count"] += 1
+
+        if status == "alert":
+            summary["critical_count"] += 1
+
+        moisture = field.get("soil_moisture", 0)
+        temperature = field.get("temperature", 0)
+
+        if moisture < 30:
+            alerts.append({
+                "field_name": field.get("name", ""),
+                "title": "土壤湿度偏低",
+                "message": "当前土壤湿度低于安全阈值，建议及时灌溉。",
+                "type": "warning" if status != "alert" else "critical",
+            })
+
+        if moisture > 70:
+            alerts.append({
+                "field_name": field.get("name", ""),
+                "title": "土壤湿度偏高",
+                "message": "当前土壤湿度过高，可能导致病虫害。",
+                "type": "critical",
+            })
+
+        if temperature < 15:
+            alerts.append({
+                "field_name": field.get("name", ""),
+                "title": "温度偏低",
+                "message": "当前温度低于安全范围，可能影响作物生长。",
+                "type": "warning",
+            })
+
+        if temperature > 35:
+            alerts.append({
+                "field_name": field.get("name", ""),
+                "title": "温度偏高",
+                "message": "当前温度超过安全阈值，建议降温或遮阴。",
+                "type": "critical",
+            })
 
     return {
-        "total_fields": total_fields,
-        "average_moisture": total_moisture / total_fields,
-        "average_temperature": total_temperature / total_fields,
-        "field_status": field_status,
+        "summary": summary,
+        "alerts": alerts,
     }
