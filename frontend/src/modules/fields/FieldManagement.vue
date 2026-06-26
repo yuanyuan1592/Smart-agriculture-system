@@ -54,6 +54,7 @@
           <p><strong>作物:</strong> {{ field.crop_type }}</p>
           <p><strong>土壤湿度:</strong> {{ field.soil_moisture }}%</p>
           <p><strong>温度:</strong> {{ field.temperature }}℃</p>
+          <p><strong>状态:</strong> <span :class="['field-status', field.status]">{{ field.status }}</span></p>
         </div>
         <div class="field-actions">
           <button @click="editField(field)" class="btn-edit">编辑</button>
@@ -224,6 +225,30 @@ h2 {
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.field-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.field-status.normal {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.field-status.warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.field-status.alert {
+  background: #fecaca;
+  color: #991b1b;
 }
 
 .fields-list {

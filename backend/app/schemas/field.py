@@ -32,6 +32,7 @@ class FieldResponse(BaseModel):
     crop_type: str
     soil_moisture: float
     temperature: float
+    status: str
     created_at: datetime
     updated_at: datetime
 

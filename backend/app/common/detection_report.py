@@ -18,7 +18,7 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
         {
             "id": field.get("id"),
             "name": field.get("name"),
-            "status": "normal" if field.get("soil_moisture", 0) >= 30 else "dry"
+            "status": field.get("status", "normal")
         }
         for field in fields
     ]
