@@ -229,6 +229,7 @@ export default defineComponent({
       submitForm,
       editField,
       formatTime,
+      formatRiskLabel,
       removeField,
       cancelForm,
       totalFields,

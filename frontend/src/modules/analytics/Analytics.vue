@@ -140,9 +140,16 @@ export default defineComponent({
   setup() {
     const analyticsStore = useAnalyticsStore()
 
-    const averageArea = computed(() => analyticsStore.summary.average_area || 0)
-    const averageMoisture = computed(() => analyticsStore.summary.average_moisture || 0)
-    const averageTemperature = computed(() => analyticsStore.summary.average_temperature || 0)
+    const formatNumber = (value) => {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) {
+        return '0.00'
+      }
+      return Number(value).toFixed(2)
+    }
+
+    const averageArea = computed(() => formatNumber(analyticsStore.summary.average_area))
+    const averageMoisture = computed(() => formatNumber(analyticsStore.summary.average_moisture))
+    const averageTemperature = computed(() => formatNumber(analyticsStore.summary.average_temperature))
 
     const cropDistribution = computed(() => {
       const distribution = analyticsStore.summary.crop_distribution || {}

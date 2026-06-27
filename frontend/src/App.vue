@@ -27,24 +27,46 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+:root {
+  color-scheme: dark;
+  color: #1f2937;
+  background-color: #f3f4f6;
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: radial-gradient(circle at top, rgba(99, 102, 241, 0.12), transparent 32%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f5f5;
 }
 
 .app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
   color: white;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 24px 20px;
+  box-shadow: 0 8px 30px rgba(31, 41, 55, 0.12);
 }
 
 .app-header h1 {
-  font-size: 24px;
-  margin-bottom: 15px;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 14px;
 }
 
 .nav-menu {
@@ -58,29 +80,32 @@ export default {
   color: white;
   text-decoration: none;
   font-size: 14px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  transition: background 0.3s;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 .nav-menu a:hover,
 .nav-menu a.router-link-active {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
 }
 
 .app-main {
   flex: 1;
-  padding: 20px;
-  max-width: 1200px;
+  padding: 24px 20px 32px;
+  max-width: 1240px;
   margin: 0 auto;
   width: 100%;
 }
 
 .app-footer {
-  background-color: #333;
-  color: white;
+  background-color: #0f172a;
+  color: #e2e8f0;
   text-align: center;
-  padding: 20px;
-  margin-top: 20px;
+  padding: 18px 20px;
+  margin-top: 24px;
+  font-size: 14px;
 }
 </style>

@@ -95,6 +95,22 @@ class FieldStore:
                 "soil_moisture": 18.0,
                 "temperature": 12.0,
             },
+            {
+                "name": "中区辣椒田",
+                "location": "中园区",
+                "area": 10.6,
+                "crop_type": "辣椒",
+                "soil_moisture": 62.0,
+                "temperature": 31.5,
+            },
+            {
+                "name": "温室草莓园",
+                "location": "温室区",
+                "area": 6.8,
+                "crop_type": "草莓",
+                "soil_moisture": 48.0,
+                "temperature": 24.0,
+            },
         ]
         for field in mock_fields:
             self.create(field)
