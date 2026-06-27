@@ -51,6 +51,18 @@ python main.py
 
 服务器将运行在 http://localhost:8000
 
+#### 一键启动
+项目根目录新增了 `start.ps1` 和 `start.bat` 启动脚本，执行以下命令即可同时启动后端和前端：
+
+- PowerShell:
+```powershell
+./start.ps1
+```
+- Windows CMD:
+```cmd
+start.bat
+```
+
 ### 前端设置
 
 1. 进入前端目录：
@@ -77,3 +89,7 @@ npm run dev
 2. 在 backend/app/routes 下增加路由
 3. 在 frontend/src/modules 下增加模块状态与服务
 4. 在 frontend/src/views 下新增页面
+
+## 协作开发目录
+
+协作者可直接从 [dev/README.md](dev/README.md) 开始使用项目内置模板，目录位于 [dev](dev)。

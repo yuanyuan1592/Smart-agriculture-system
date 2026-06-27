@@ -19,20 +19,43 @@
           <h3>严重风险</h3>
           <p class="value">{{ detectionStore.report.summary.critical_count }}</p>
         </div>
+        <div class="card warning">
+          <h3>天气预警</h3>
+          <p class="value">{{ detectionStore.report.summary.weather_alert_count }}</p>
+        </div>
+        <div class="card critical">
+          <h3>病虫害风险</h3>
+          <p class="value">{{ detectionStore.report.summary.pest_risk_summary || '暂无' }}</p>
+        </div>
         <div class="card healthy">
           <h3>健康农田</h3>
           <p class="value">{{ detectionStore.report.summary.healthy_count }}</p>
         </div>
       </div>
 
+      <div v-if="detectionStore.report.summary.pest_risk_summary" class="pest-risk-summary">
+        <h4>病虫害风险评估</h4>
+        <p>{{ detectionStore.report.summary.pest_risk_summary }}</p>
+      </div>
+
       <div class="alert-list">
         <h3>检测结果</h3>
         <div v-if="detectionStore.report.alerts.length === 0" class="empty">当前暂无异常，农田状态整体良好。</div>
-        <div v-for="item in detectionStore.report.alerts" :key="item.field_name + item.title" class="alert-item" :class="item.type">
-          <div>
-            <strong>{{ item.field_name }}</strong>
-            <p>{{ item.title }}</p>
-            <span>{{ item.message }}</span>
+        <div v-for="item in sortedAlerts" :key="item.field_name + item.title + item.source" class="alert-item" :class="item.type">
+          <div class="alert-header">
+            <div>
+              <strong>{{ item.field_name }}</strong>
+              <p>{{ item.title }}</p>
+            </div>
+            <div class="alert-tags">
+              <span :class="['alert-badge', item.type]">{{ alertTypeLabel(item.type) }}</span>
+              <span :class="['alert-source', item.source === '气象预警' ? 'weather' : 'sensor']">{{ item.source }}</span>
+            </div>
+          </div>
+          <p class="alert-message">{{ item.message }}</p>
+          <p class="alert-detail">{{ item.detail }}</p>
+          <div class="alert-recommendation">
+            <strong>推荐操作：</strong>{{ item.recommendation }}
           </div>
         </div>
       </div>
@@ -41,7 +64,7 @@
 </template>
 
 <script>
-import { defineComponent, onMounted } from 'vue'
+import { defineComponent, onMounted, computed } from 'vue'
 import { useDetectionStore } from './store'
 
 export default defineComponent({
@@ -49,12 +72,27 @@ export default defineComponent({
   setup() {
     const detectionStore = useDetectionStore()
 
+    const sortedAlerts = computed(() => {
+      return [...(detectionStore.report.alerts || [])].sort((a, b) => {
+        const priority = { critical: 0, warning: 1, normal: 2 }
+        return (priority[a.type] || 2) - (priority[b.type] || 2)
+      })
+    })
+
+    const alertTypeLabel = (type) => {
+      if (type === 'critical') return '高风险'
+      if (type === 'warning') return '警告'
+      return '正常'
+    }
+
     onMounted(() => {
       detectionStore.fetchReport()
     })
 
     return {
       detectionStore,
+      sortedAlerts,
+      alertTypeLabel,
     }
   }
 })
@@ -73,6 +111,21 @@ export default defineComponent({
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
+}
+
+@media (max-width: 720px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .field-management,
+  .detection-page,
+  .weather-page,
+  .analytics {
+    padding: 0 10px;
+  }
 }
 .card {
   background: white;
@@ -95,12 +148,84 @@ export default defineComponent({
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+.pest-risk-summary {
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 10px;
+  background: #fef9c3;
+  color: #92400e;
+}
 .alert-item {
   border-left: 4px solid #94a3b8;
-  padding: 12px 14px;
+  padding: 16px;
   margin-top: 12px;
   background: #f8fafc;
-  border-radius: 6px;
+  border-radius: 10px;
+}
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.alert-header strong {
+  display: block;
+  font-size: 15px;
+  color: #1f2937;
+}
+.alert-tags {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.alert-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #ef4444;
+}
+.alert-badge.warning {
+  background: #f59e0b;
+}
+.alert-badge.normal {
+  background: #10b981;
+}
+.alert-source {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  background: #e2e8f0;
+}
+.alert-source.weather {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.alert-source.sensor {
+  background: #d1fae5;
+  color: #065f46;
+}
+.alert-message {
+  margin: 10px 0 0;
+  color: #475569;
+  line-height: 1.6;
+}
+.alert-detail {
+  margin-top: 8px;
+  color: #334155;
+  font-size: 13px;
+}
+.alert-recommendation {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 14px;
+  line-height: 1.6;
 }
 .alert-item.warning { border-left-color: #f59e0b; }
 .alert-item.critical { border-left-color: #ef4444; }

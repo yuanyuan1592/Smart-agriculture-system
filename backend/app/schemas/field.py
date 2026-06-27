@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
+
+
+class FieldHistoryItem(BaseModel):
+    timestamp: datetime
+    soil_moisture: float
+    temperature: float
 
 
 class FieldCreate(BaseModel):
@@ -11,6 +17,10 @@ class FieldCreate(BaseModel):
     crop_type: str
     soil_moisture: float
     temperature: float
+    moisture_threshold_low: Optional[float] = None
+    moisture_threshold_high: Optional[float] = None
+    temperature_threshold_low: Optional[float] = None
+    temperature_threshold_high: Optional[float] = None
 
 
 class FieldUpdate(BaseModel):
@@ -21,6 +31,10 @@ class FieldUpdate(BaseModel):
     crop_type: Optional[str] = None
     soil_moisture: Optional[float] = None
     temperature: Optional[float] = None
+    moisture_threshold_low: Optional[float] = None
+    moisture_threshold_high: Optional[float] = None
+    temperature_threshold_low: Optional[float] = None
+    temperature_threshold_high: Optional[float] = None
 
 
 class FieldResponse(BaseModel):
@@ -32,6 +46,12 @@ class FieldResponse(BaseModel):
     crop_type: str
     soil_moisture: float
     temperature: float
+    moisture_threshold_low: float
+    moisture_threshold_high: float
+    temperature_threshold_low: float
+    temperature_threshold_high: float
+    last_measurement_at: datetime
+    history: List[FieldHistoryItem]
     status: str
     created_at: datetime
     updated_at: datetime

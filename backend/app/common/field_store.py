@@ -1,9 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
 
 class FieldStore:
     """公共字段存储服务，供各模块调用。"""
+
+    DEFAULT_MOISTURE_LOW = 30.0
+    DEFAULT_MOISTURE_HIGH = 70.0
+    DEFAULT_TEMPERATURE_LOW = 15.0
+    DEFAULT_TEMPERATURE_HIGH = 35.0
 
     def __init__(self) -> None:
         self._fields: List[Dict[str, Any]] = []
@@ -12,16 +17,48 @@ class FieldStore:
     def _get_status(self, field_data: Dict[str, Any]) -> str:
         moisture = field_data.get("soil_moisture", 0)
         temp = field_data.get("temperature", 0)
-        if moisture < 30 or temp < 15 or temp > 35:
-            return "warning"
-        if moisture > 70:
+        moisture_low = field_data.get("moisture_threshold_low", self.DEFAULT_MOISTURE_LOW)
+        moisture_high = field_data.get("moisture_threshold_high", self.DEFAULT_MOISTURE_HIGH)
+        temp_low = field_data.get("temperature_threshold_low", self.DEFAULT_TEMPERATURE_LOW)
+        temp_high = field_data.get("temperature_threshold_high", self.DEFAULT_TEMPERATURE_HIGH)
+
+        if moisture < moisture_low * 0.7 or temp < temp_low - 10 or temp > temp_high + 3:
             return "alert"
+        if moisture < moisture_low or moisture > moisture_high or temp < temp_low or temp > temp_high:
+            return "warning"
         return "normal"
 
+    def _generate_history_entries(self, field_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        now = datetime.utcnow()
+        base_moisture = field_data.get("soil_moisture", 0)
+        base_temperature = field_data.get("temperature", 0)
+        history = []
+        for day_offset in range(9, -1, -1):
+            moisture_variation = base_moisture - (9 - day_offset) * 1.8
+            temperature_variation = base_temperature - (9 - day_offset) * 0.8
+            history.append({
+                "timestamp": now - timedelta(days=day_offset),
+                "soil_moisture": max(0.0, round(moisture_variation, 1)),
+                "temperature": round(temperature_variation, 1),
+            })
+        return history
+
+    def _default_thresholds(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "moisture_threshold_low": data.get("moisture_threshold_low", self.DEFAULT_MOISTURE_LOW),
+            "moisture_threshold_high": data.get("moisture_threshold_high", self.DEFAULT_MOISTURE_HIGH),
+            "temperature_threshold_low": data.get("temperature_threshold_low", self.DEFAULT_TEMPERATURE_LOW),
+            "temperature_threshold_high": data.get("temperature_threshold_high", self.DEFAULT_TEMPERATURE_HIGH),
+        }
+
     def _normalize_field(self, field_data: Dict[str, Any]) -> Dict[str, Any]:
+        thresholds = self._default_thresholds(field_data)
         return {
             **field_data,
+            **thresholds,
             "status": self._get_status(field_data),
+            "last_measurement_at": datetime.utcnow(),
+            "history": self._generate_history_entries(field_data),
         }
 
     def _initialize_mock_data(self) -> None:
@@ -87,8 +124,17 @@ class FieldStore:
         for index, field in enumerate(self._fields):
             if field.get("id") == field_id:
                 self._fields[index].update(field_data)
+                self._fields[index].update(self._default_thresholds(self._fields[index]))
                 self._fields[index]["status"] = self._get_status(self._fields[index])
                 self._fields[index]["updated_at"] = datetime.utcnow()
+                self._fields[index]["last_measurement_at"] = datetime.utcnow()
+                current_history = self._fields[index].get("history", [])
+                current_history.insert(0, {
+                    "timestamp": self._fields[index]["last_measurement_at"],
+                    "soil_moisture": round(self._fields[index].get("soil_moisture", 0), 1),
+                    "temperature": round(self._fields[index].get("temperature", 0), 1),
+                })
+                self._fields[index]["history"] = current_history[:30]
                 return self._fields[index]
         return None
 

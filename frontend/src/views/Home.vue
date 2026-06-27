@@ -4,25 +4,30 @@
     <p>这是一个基于现代技术的农业管理解决方案</p>
     
     <div class="feature-grid">
-      <div class="feature-card">
+      <router-link to="/fields" class="feature-card">
         <h3>🌱 农田监测</h3>
         <p>实时监测土壤湿度、温度等参数</p>
-      </div>
+      </router-link>
       
-      <div class="feature-card">
+      <router-link to="/analytics" class="feature-card">
         <h3>📊 数据分析</h3>
         <p>深度分析农业数据，优化种植方案</p>
-      </div>
+      </router-link>
       
-      <div class="feature-card">
+      <router-link to="/weather" class="feature-card">
+        <h3>🌤 天气预报</h3>
+        <p>实时天气和灾害预测，辅助农业决策</p>
+      </router-link>
+      
+      <router-link to="/detection" class="feature-card">
         <h3>🔔 智能预警</h3>
         <p>异常情况提前预警，保护作物生长</p>
-      </div>
+      </router-link>
       
-      <div class="feature-card">
+      <router-link to="/fields" class="feature-card mobile-access">
         <h3>📱 移动访问</h3>
-        <p>随时随地管理您的农田</p>
-      </div>
+        <p>适配手机布局，随时掌握农业动态</p>
+      </router-link>
     </div>
     
     <div class="quick-start">
@@ -68,6 +73,8 @@ p {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   transition: transform 0.3s, box-shadow 0.3s;
+  text-decoration: none;
+  color: inherit;
 }
 
 .feature-card:hover {
@@ -79,6 +86,10 @@ p {
   font-size: 18px;
   margin-bottom: 10px;
   color: #667eea;
+}
+
+.feature-card.mobile-access h3 {
+  color: #10b981;
 }
 
 .feature-card p {

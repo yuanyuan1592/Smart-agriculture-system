@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import FieldManagement from '../modules/fields/FieldManagement.vue'
 import Analytics from '../modules/analytics/Analytics.vue'
 import Detection from '../modules/detection/Detection.vue'
+import Weather from '../modules/weather/Weather.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/detection',
     name: 'Detection',
     component: Detection
+  },
+  {
+    path: '/weather',
+    name: 'Weather',
+    component: Weather
   }
 ]
 

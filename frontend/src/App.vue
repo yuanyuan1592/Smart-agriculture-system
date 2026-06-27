@@ -7,6 +7,7 @@
         <router-link to="/fields">农田管理</router-link>
         <router-link to="/analytics">数据分析</router-link>
         <router-link to="/detection">农业检测</router-link>
+        <router-link to="/weather">天气预报</router-link>
       </nav>
     </header>
     
@@ -48,7 +49,9 @@ export default {
 
 .nav-menu {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
 }
 
 .nav-menu a {

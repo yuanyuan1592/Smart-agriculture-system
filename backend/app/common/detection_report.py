@@ -1,4 +1,6 @@
 from typing import Any, Dict, List
+from app.common.weather_store import weather_store
+from app.common.rule_engine import RuleEngine
 
 
 def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -8,17 +10,45 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
         "warning_count": 0,
         "critical_count": 0,
         "healthy_count": 0,
+        "weather_alert_count": 0,
+        "pest_risk_summary": "",
     }
     alerts: List[Dict[str, Any]] = []
 
     def get_status(field_data: Dict[str, Any]) -> str:
         moisture = field_data.get("soil_moisture", 0)
         temperature = field_data.get("temperature", 0)
-        if moisture < 30 or temperature < 15 or temperature > 35:
-            return "warning"
-        if moisture > 70:
+        if moisture <= 22 or temperature < 5 or temperature >= 38:
             return "alert"
+        if moisture < 30 or temperature < 15 or temperature > 35 or moisture > 70:
+            return "warning"
         return "normal"
+
+    def _recommend_action(title: str, alert_type: str) -> str:
+        if "干旱" in title:
+            return "建议及时灌溉，补充水分并检查土壤含水状况。"
+        if "湿度过高" in title or "洪涝" in title:
+            return "建议暂停灌溉，检查排水并预防病虫害。"
+        if "低温" in title or "严寒" in title:
+            return "建议加强保温、防霜和覆盖保护。"
+        if "高温" in title or "极端高温" in title:
+            return "建议加强遮阳、补水并监控叶面蒸腾。"
+        if "强风" in title:
+            return "建议加固设施，移除松散物，防止风害。"
+        if "空气污染" in title or "紫外线" in title:
+            return "建议减少露天作业，做好防护。"
+        return "建议关注当前预警，及时调整管理措施。"
+
+    def append_alert(field_name: str, title: str, message: str, alert_type: str, source: str = "传感器", detail: str = ""):
+        alerts.append({
+            "field_name": field_name,
+            "title": title,
+            "message": message,
+            "type": alert_type,
+            "source": source,
+            "detail": detail,
+            "recommendation": _recommend_action(title, alert_type),
+        })
 
     for field in fields:
         summary["total_fields"] += 1
@@ -35,38 +65,99 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
         moisture = field.get("soil_moisture", 0)
         temperature = field.get("temperature", 0)
 
-        if moisture < 30:
-            alerts.append({
-                "field_name": field.get("name", ""),
-                "title": "土壤湿度偏低",
-                "message": "当前土壤湿度低于安全阈值，建议及时灌溉。",
-                "type": "warning" if status != "alert" else "critical",
-            })
+        thresholds = {
+            "moisture_low": field.get("moisture_threshold_low", 30.0),
+            "moisture_high": field.get("moisture_threshold_high", 70.0),
+            "temperature_low": field.get("temperature_threshold_low", 15.0),
+            "temperature_high": field.get("temperature_threshold_high", 35.0),
+        }
 
-        if moisture > 70:
-            alerts.append({
-                "field_name": field.get("name", ""),
-                "title": "土壤湿度偏高",
-                "message": "当前土壤湿度过高，可能导致病虫害。",
-                "type": "critical",
-            })
+        if moisture <= 22:
+            append_alert(
+                field.get("name", ""),
+                "土壤湿度偏低",
+                "当前土壤湿度极低，可能出现旱情，请尽快灌溉。",
+                "critical",
+                "传感器",
+                f"湿度 {moisture}%，阈值区间 {thresholds['moisture_low']}%~{thresholds['moisture_high']}%"
+            )
+        elif moisture < 30:
+            append_alert(
+                field.get("name", ""),
+                "土壤湿度偏低",
+                "当前土壤湿度偏低，建议及时灌溉。",
+                "warning",
+                "传感器",
+                f"湿度 {moisture}%，阈值下限 {thresholds['moisture_low']}%"
+            )
 
-        if temperature < 15:
-            alerts.append({
-                "field_name": field.get("name", ""),
-                "title": "温度偏低",
-                "message": "当前温度低于安全范围，可能影响作物生长。",
-                "type": "warning",
-            })
+        if moisture > 90:
+            append_alert(
+                field.get("name", ""),
+                "暴雨洪涝预警",
+                "土壤湿度极高，存在洪涝和病虫害风险。",
+                "critical",
+                "传感器",
+                f"湿度 {moisture}%，阈值上限 {thresholds['moisture_high']}%"
+            )
+        elif moisture > 70:
+            append_alert(
+                field.get("name", ""),
+                "湿度过高",
+                "当前土壤湿度较高，需警惕渍涝和病害。",
+                "warning",
+                "传感器",
+                f"湿度 {moisture}%，阈值上限 {thresholds['moisture_high']}%"
+            )
 
-        if temperature > 35:
-            alerts.append({
-                "field_name": field.get("name", ""),
-                "title": "温度偏高",
-                "message": "当前温度超过安全阈值，建议降温或遮阴。",
-                "type": "critical",
-            })
+        if temperature < 5:
+            append_alert(
+                field.get("name", ""),
+                "严寒预警",
+                "当前温度极低，可能影响作物生长，建议采取保温措施。",
+                "critical",
+                "传感器",
+                f"温度 {temperature}℃，阈值下限 {thresholds['temperature_low']}℃"
+            )
+        elif temperature < 15:
+            append_alert(
+                field.get("name", ""),
+                "低温预警",
+                "当前温度低于安全范围，可能影响作物发育。",
+                "warning",
+                "传感器",
+                f"温度 {temperature}℃，阈值下限 {thresholds['temperature_low']}℃"
+            )
 
+        if temperature > 38:
+            append_alert(
+                field.get("name", ""),
+                "极端高温预警",
+                "当前温度非常高，可能对作物造成严重伤害。",
+                "critical",
+                "传感器",
+                f"温度 {temperature}℃，阈值上限 {thresholds['temperature_high']}℃"
+            )
+        elif temperature > 35:
+            append_alert(
+                field.get("name", ""),
+                "高温预警",
+                "当前温度偏高，建议加强遮阳和补水。",
+                "warning",
+                "传感器",
+                f"温度 {temperature}℃，阈值上限 {thresholds['temperature_high']}℃"
+            )
+
+    for weather in weather_store.all():
+        for prediction in weather.get("disaster_predictions", []):
+            if "极端" in prediction or "严寒" in prediction or "洪涝" in prediction or "强风" in prediction:
+                alert_type = "critical"
+            else:
+                alert_type = "warning"
+            append_alert(weather.get("location", "气象预警"), prediction, "该预警来自天气预报，已自动触发并推送给用户。", alert_type, "气象预警")
+            summary["weather_alert_count"] += 1
+
+    summary["pest_risk_summary"] = RuleEngine.evaluate_pest_risk(fields)
     return {
         "summary": summary,
         "alerts": alerts,
