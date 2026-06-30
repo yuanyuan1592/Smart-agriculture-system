@@ -39,7 +39,7 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
             return "建议减少露天作业，做好防护。"
         return "建议关注当前预警，及时调整管理措施。"
 
-    def append_alert(field_name: str, title: str, message: str, alert_type: str, source: str = "传感器", detail: str = ""):
+    def append_alert(field_name: str, title: str, message: str, alert_type: str, source: str = "传感器", detail: str = "", field_id: int | None = None):
         alerts.append({
             "field_name": field_name,
             "title": title,
@@ -48,6 +48,7 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
             "source": source,
             "detail": detail,
             "recommendation": _recommend_action(title, alert_type),
+            "field_id": field_id,
         })
 
     for field in fields:
@@ -79,7 +80,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "当前土壤湿度极低，可能出现旱情，请尽快灌溉。",
                 "critical",
                 "传感器",
-                f"湿度 {moisture}%，阈值区间 {thresholds['moisture_low']}%~{thresholds['moisture_high']}%"
+                f"湿度 {moisture}%，阈值区间 {thresholds['moisture_low']}%~{thresholds['moisture_high']}%",
+                field.get("id")
             )
         elif moisture < 30:
             append_alert(
@@ -88,7 +90,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "当前土壤湿度偏低，建议及时灌溉。",
                 "warning",
                 "传感器",
-                f"湿度 {moisture}%，阈值下限 {thresholds['moisture_low']}%"
+                f"湿度 {moisture}%，阈值下限 {thresholds['moisture_low']}%",
+                field.get("id")
             )
 
         if moisture > 90:
@@ -98,7 +101,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "土壤湿度极高，存在洪涝和病虫害风险。",
                 "critical",
                 "传感器",
-                f"湿度 {moisture}%，阈值上限 {thresholds['moisture_high']}%"
+                f"湿度 {moisture}%，阈值上限 {thresholds['moisture_high']}%",
+                field.get("id")
             )
         elif moisture > 70:
             append_alert(
@@ -107,7 +111,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "当前土壤湿度较高，需警惕渍涝和病害。",
                 "warning",
                 "传感器",
-                f"湿度 {moisture}%，阈值上限 {thresholds['moisture_high']}%"
+                f"湿度 {moisture}%，阈值上限 {thresholds['moisture_high']}%",
+                field.get("id")
             )
 
         if temperature < 5:
@@ -117,7 +122,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "当前温度极低，可能影响作物生长，建议采取保温措施。",
                 "critical",
                 "传感器",
-                f"温度 {temperature}℃，阈值下限 {thresholds['temperature_low']}℃"
+                f"温度 {temperature}℃，阈值下限 {thresholds['temperature_low']}℃",
+                field.get("id")
             )
         elif temperature < 15:
             append_alert(
@@ -126,7 +132,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "当前温度低于安全范围，可能影响作物发育。",
                 "warning",
                 "传感器",
-                f"温度 {temperature}℃，阈值下限 {thresholds['temperature_low']}℃"
+                f"温度 {temperature}℃，阈值下限 {thresholds['temperature_low']}℃",
+                field.get("id")
             )
 
         if temperature > 38:
@@ -136,7 +143,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "当前温度非常高，可能对作物造成严重伤害。",
                 "critical",
                 "传感器",
-                f"温度 {temperature}℃，阈值上限 {thresholds['temperature_high']}℃"
+                f"温度 {temperature}℃，阈值上限 {thresholds['temperature_high']}℃",
+                field.get("id")
             )
         elif temperature > 35:
             append_alert(
@@ -145,7 +153,8 @@ def build_detection_report(fields: List[Dict[str, Any]]) -> Dict[str, Any]:
                 "当前温度偏高，建议加强遮阳和补水。",
                 "warning",
                 "传感器",
-                f"温度 {temperature}℃，阈值上限 {thresholds['temperature_high']}℃"
+                f"温度 {temperature}℃，阈值上限 {thresholds['temperature_high']}℃",
+                field.get("id")
             )
 
     for weather in weather_store.all():

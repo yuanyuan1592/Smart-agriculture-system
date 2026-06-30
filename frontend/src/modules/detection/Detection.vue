@@ -41,7 +41,12 @@
       <div class="alert-list">
         <h3>检测结果</h3>
         <div v-if="detectionStore.report.alerts.length === 0" class="empty">当前暂无异常，农田状态整体良好。</div>
-        <div v-for="item in sortedAlerts" :key="item.field_name + item.title + item.source" class="alert-item" :class="item.type">
+        <div
+          v-for="item in sortedAlerts"
+          :key="item.field_name + item.title + item.source"
+          class="alert-item"
+          :class="[{ clickable: item.source === '传感器' && item.field_id }, item.type]"
+          @click="gotoDeviceManagement(item)">
           <div class="alert-header">
             <div>
               <strong>{{ item.field_name }}</strong>
@@ -65,11 +70,13 @@
 
 <script>
 import { defineComponent, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useDetectionStore } from './store'
 
 export default defineComponent({
   name: 'Detection',
   setup() {
+    const router = useRouter()
     const detectionStore = useDetectionStore()
 
     const sortedAlerts = computed(() => {
@@ -85,6 +92,40 @@ export default defineComponent({
       return '正常'
     }
 
+    const getHighlightTypes = (title) => {
+      const types = []
+      if (title.includes('湿度')) {
+        types.push('irrigation')
+      }
+      if (title.includes('温度') || title.includes('高温') || title.includes('低温') || title.includes('严寒') || title.includes('极端高温')) {
+        types.push('temperature')
+      }
+      if (title.includes('风') || title.includes('通风')) {
+        types.push('ventilation')
+      }
+      if (title.includes('农药')) {
+        types.push('pesticide')
+      }
+      if (title.includes('补光') || title.includes('照明')) {
+        types.push('lighting')
+      }
+      return [...new Set(types)]
+    }
+
+    const gotoDeviceManagement = (item) => {
+      if (!item.field_id || item.source !== '传感器') {
+        return
+      }
+      const highlightTypes = getHighlightTypes(item.title)
+      const query = {
+        field: item.field_id,
+      }
+      if (highlightTypes.length) {
+        query.highlightTypes = highlightTypes.join(',')
+      }
+      router.push({ name: 'DeviceManagement', query })
+    }
+
     onMounted(() => {
       detectionStore.fetchReport()
     })
@@ -93,6 +134,7 @@ export default defineComponent({
       detectionStore,
       sortedAlerts,
       alertTypeLabel,
+      gotoDeviceManagement,
     }
   }
 })
@@ -161,6 +203,21 @@ export default defineComponent({
   margin-top: 12px;
   background: #f8fafc;
   border-radius: 10px;
+}
+.alert-item.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.alert-item.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+.alert-item.clickable::after {
+  content: '点击查看设备';
+  display: inline-block;
+  margin-left: 12px;
+  color: #2563eb;
+  font-size: 12px;
 }
 .alert-header {
   display: flex;

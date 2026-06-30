@@ -40,6 +40,11 @@
         <h3>智能预警</h3>
         <p>自动生成高风险和病虫害告警。</p>
       </router-link>
+      <router-link to="/devices" class="feature-card">
+        <span>⚙️</span>
+        <h3>设备管理</h3>
+        <p>控制灌溉、温度、农药和补光设备。</p>
+      </router-link>
     </section>
 
     <section class="note-panel">

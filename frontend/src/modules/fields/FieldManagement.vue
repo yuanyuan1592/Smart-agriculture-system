@@ -25,55 +25,60 @@
       </div>
     </div>
 
-    <!-- 添加/编辑表单 -->
-    <div v-if="showAddForm" class="form-container">
-      <h3>{{ isEditing ? '编辑农田' : '添加新农田' }}</h3>
-      <form @submit.prevent="submitForm">
-        <div class="form-group">
-          <label>农田名称:</label>
-          <input v-model="formData.name" type="text" required>
+    <!-- 添加/编辑模态弹窗 -->
+    <div v-if="showAddForm" class="modal-overlay" @click.self="cancelForm">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>{{ isEditing ? '编辑农田' : '添加新农田' }}</h3>
+          <button class="modal-close" type="button" @click="cancelForm">×</button>
         </div>
-        <div class="form-group">
-          <label>位置:</label>
-          <input v-model="formData.location" type="text" required>
-        </div>
-        <div class="form-group">
-          <label>面积 (亩):</label>
-          <input v-model.number="formData.area" type="number" step="0.1" required>
-        </div>
-        <div class="form-group">
-          <label>作物类型:</label>
-          <input v-model="formData.crop_type" type="text" required>
-        </div>
-        <div class="form-group">
-          <label>土壤湿度 (%):</label>
-          <input v-model.number="formData.soil_moisture" type="number" step="0.1" required>
-        </div>
-        <div class="form-group">
-          <label>温度 (℃):</label>
-          <input v-model.number="formData.temperature" type="number" step="0.1" required>
-        </div>
-        <div class="form-group threshold-group">
-          <label>土壤湿度阈值:</label>
-          <div class="threshold-inputs">
-            <input v-model.number="formData.moisture_threshold_low" type="number" step="0.1" placeholder="下限">
-            <span>~</span>
-            <input v-model.number="formData.moisture_threshold_high" type="number" step="0.1" placeholder="上限">
+        <form @submit.prevent="submitForm" class="modal-form">
+          <div class="form-group">
+            <label>农田名称:</label>
+            <input v-model="formData.name" type="text" required>
           </div>
-        </div>
-        <div class="form-group threshold-group">
-          <label>温度阈值:</label>
-          <div class="threshold-inputs">
-            <input v-model.number="formData.temperature_threshold_low" type="number" step="0.1" placeholder="下限">
-            <span>~</span>
-            <input v-model.number="formData.temperature_threshold_high" type="number" step="0.1" placeholder="上限">
+          <div class="form-group">
+            <label>位置:</label>
+            <input v-model="formData.location" type="text" required>
           </div>
-        </div>
-        <div class="form-actions">
-          <button type="submit" class="btn-submit">提交</button>
-          <button type="button" @click="cancelForm" class="btn-cancel">取消</button>
-        </div>
-      </form>
+          <div class="form-group">
+            <label>面积 (亩):</label>
+            <input v-model.number="formData.area" type="number" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label>作物类型:</label>
+            <input v-model="formData.crop_type" type="text" required>
+          </div>
+          <div class="form-group">
+            <label>土壤湿度 (%):</label>
+            <input v-model.number="formData.soil_moisture" type="number" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label>温度 (℃):</label>
+            <input v-model.number="formData.temperature" type="number" step="0.1" required>
+          </div>
+          <div class="form-group threshold-group">
+            <label>土壤湿度阈值:</label>
+            <div class="threshold-inputs">
+              <input v-model.number="formData.moisture_threshold_low" type="number" step="0.1" placeholder="下限">
+              <span>~</span>
+              <input v-model.number="formData.moisture_threshold_high" type="number" step="0.1" placeholder="上限">
+            </div>
+          </div>
+          <div class="form-group threshold-group">
+            <label>温度阈值:</label>
+            <div class="threshold-inputs">
+              <input v-model.number="formData.temperature_threshold_low" type="number" step="0.1" placeholder="下限">
+              <span>~</span>
+              <input v-model.number="formData.temperature_threshold_high" type="number" step="0.1" placeholder="上限">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-submit">提交</button>
+            <button type="button" @click="cancelForm" class="btn-cancel">取消</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- 农田列表 -->
@@ -265,12 +270,50 @@ h2 {
   opacity: 0.9;
 }
 
-.form-container {
-  background: white;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
   padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.modal-container {
+  width: min(100%, 720px);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  color: #475569;
+  cursor: pointer;
+}
+
+.modal-form {
+  padding: 24px;
 }
 
 .form-group {

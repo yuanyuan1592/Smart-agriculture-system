@@ -34,7 +34,7 @@
           <div class="crop-bar">
             <div class="crop-progress" :style="{ width: crop.percentage + '%' }"></div>
           </div>
-          <span class="crop-count">{{ crop.count }} 个</span>
+          <span class="crop-count">{{ crop.area.toFixed(2) }} 亩</span>
         </div>
       </div>
 
@@ -151,14 +151,15 @@ export default defineComponent({
     const averageMoisture = computed(() => formatNumber(analyticsStore.summary.average_moisture))
     const averageTemperature = computed(() => formatNumber(analyticsStore.summary.average_temperature))
 
+    const totalArea = computed(() => Number(analyticsStore.summary.total_area || 0))
+
     const cropDistribution = computed(() => {
       const distribution = analyticsStore.summary.crop_distribution || {}
-      return Object.entries(distribution).map(([type, count]) => ({
+      const areaTotal = totalArea.value || Object.values(distribution).reduce((sum, area) => sum + Number(area || 0), 0)
+      return Object.entries(distribution).map(([type, area]) => ({
         type,
-        count,
-        percentage: analyticsStore.summary.total_fields
-          ? Math.round((count / analyticsStore.summary.total_fields) * 100)
-          : 0
+        area: Number(area || 0),
+        percentage: areaTotal ? Math.round((Number(area || 0) / areaTotal) * 100) : 0
       }))
     })
 

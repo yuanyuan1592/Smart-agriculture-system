@@ -8,6 +8,7 @@
         <router-link to="/analytics">数据分析</router-link>
         <router-link to="/detection">农业检测</router-link>
         <router-link to="/weather">天气预报</router-link>
+        <router-link to="/devices">设备管理</router-link>
       </nav>
     </header>
     
