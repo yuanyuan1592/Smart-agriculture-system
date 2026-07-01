@@ -1,0 +1,14 @@
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    globals: true,
+    pool: 'threads',
+    maxWorkers: 1,
+    minWorkers: 1,
+    coverage: {
+      reporter: ['text', 'json-summary', 'html'],
+    },
+  },
+})

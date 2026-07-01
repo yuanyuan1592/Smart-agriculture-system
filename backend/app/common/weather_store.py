@@ -54,6 +54,28 @@ class WeatherStore:
 
         return predictions
 
+    @staticmethod
+    def _build_light_advice(weather: Dict[str, Any]) -> str:
+        temperature = weather.get("temperature", 0)
+        humidity = weather.get("humidity", 0)
+        uv_index = weather.get("uv_index", 0)
+        if uv_index >= 9 or temperature >= 35:
+            return "强烈光照，建议做好遮阳与补水"
+        if uv_index >= 7 or humidity <= 35:
+            return "光照较强，适合适度补光"
+        return "当前光照条件较稳定"
+
+    @staticmethod
+    def _build_agri_advice(weather: Dict[str, Any]) -> Dict[str, str]:
+        temperature = weather.get("temperature", 0)
+        humidity = weather.get("humidity", 0)
+        condition = weather.get("condition", "")
+        return {
+            "irrigation": "建议适度灌溉，避开高温时段" if temperature >= 30 else "当前湿度较适宜，保持现有灌溉节奏",
+            "spraying": "建议暂停喷药，等待风力变小后再操作" if "风" in condition or weather.get("wind_strength", "") != "" else "适合进行病虫害防治作业",
+            "harvest": "适合安排采收，注意避开强降雨" if temperature >= 24 and humidity <= 80 else "建议继续观察作物成熟度",
+        }
+
     def _initialize_mock_data(self) -> None:
         mock_weather = [
             {
@@ -249,6 +271,8 @@ class WeatherStore:
         for weather in mock_weather:
             weather["generated_at"] = datetime.utcnow()
             weather["disaster_predictions"] = self._build_disaster_predictions(weather)
+            weather["light_advice"] = self._build_light_advice(weather)
+            weather["agri_advice"] = self._build_agri_advice(weather)
             self._weather.append(weather)
 
     def all(self) -> List[Dict[str, Any]]:

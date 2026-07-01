@@ -9,6 +9,7 @@
         <router-link to="/detection">农业检测</router-link>
         <router-link to="/weather">天气预报</router-link>
         <router-link to="/devices">设备管理</router-link>
+        <router-link to="/farm">农事管理</router-link>
       </nav>
     </header>
     

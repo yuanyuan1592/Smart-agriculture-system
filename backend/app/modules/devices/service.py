@@ -19,3 +19,16 @@ class DevicesModuleService:
     @staticmethod
     def update_device(device_id: int, update_data: dict):
         return device_store.update(device_id, update_data)
+
+    @staticmethod
+    def auto_control_for_field(field_id: int):
+        field = None
+        from app.common.field_store import field_store
+
+        for item in field_store.all():
+            if item.get("id") == field_id:
+                field = item
+                break
+        if field is None:
+            return []
+        return device_store.apply_auto_control_for_field(field)

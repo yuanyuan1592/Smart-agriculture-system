@@ -21,6 +21,23 @@
       </div>
     </div>
 
+    <div class="operations-panel" v-if="selectedFieldId > 0">
+      <div class="operations-header">
+        <div>
+          <h3>联动控制中心</h3>
+          <p>根据当前农田环境自动下发控制建议，帮助你快速处理异常情况。</p>
+        </div>
+        <button class="btn-action" @click="runAutoControl">执行联动控制</button>
+      </div>
+      <div class="operations-list">
+        <div v-for="device in autoDevices" :key="device.id" class="operation-item">
+          <strong>{{ device.name }}</strong>
+          <span v-if="device.auto_control_message">{{ device.auto_control_message }}</span>
+          <span v-else>当前状态稳定，无需联动调整</span>
+        </div>
+      </div>
+    </div>
+
     <div class="field-list">
       <button
         :class="['field-chip', { active: selectedFieldId === 0 }]"
@@ -102,6 +119,7 @@ export default defineComponent({
     const fieldStore = useFieldStore()
     const route = useRoute()
     const devices = ref([])
+    const autoDevices = ref([])
     const selectedFieldId = ref(0)
     const highlightTypes = ref([])
     const showAdjustDialog = ref(false)
@@ -120,8 +138,11 @@ export default defineComponent({
       if (selectedFieldId.value > 0) {
         const response = await api.get(`/api/devices/field/${selectedFieldId.value}`)
         devices.value = response.data
+        const autoResponse = await api.get(`/api/devices/auto/${selectedFieldId.value}`)
+        autoDevices.value = autoResponse.data
       } else {
         await fetchDevices()
+        autoDevices.value = []
       }
     }
 
@@ -151,6 +172,17 @@ export default defineComponent({
       selectedFieldId.value = fieldId
       highlightTypes.value = []
       await loadDevicesByField()
+    }
+
+    const runAutoControl = async () => {
+      if (selectedFieldId.value <= 0) return
+      try {
+        const response = await api.get(`/api/devices/auto/${selectedFieldId.value}`)
+        autoDevices.value = response.data
+        devices.value = response.data
+      } catch (err) {
+        console.error('执行联动控制失败:', err)
+      }
     }
 
     const isHighlighted = (device) => {
@@ -216,6 +248,7 @@ export default defineComponent({
 
     return {
       devices,
+      autoDevices,
       selectedFieldId,
       showAdjustDialog,
       currentDevice,
@@ -226,6 +259,7 @@ export default defineComponent({
       fields: fieldStore.fields,
       fieldName,
       selectField,
+      runAutoControl,
       isHighlighted,
       togglePower,
       switchMode,
@@ -255,6 +289,47 @@ export default defineComponent({
   border-radius: 18px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.operations-panel {
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid #dbeafe;
+}
+
+.operations-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.operations-header h3 {
+  margin: 0 0 6px;
+  color: #1d4ed8;
+}
+
+.operations-header p {
+  margin: 0;
+  color: #475569;
+}
+
+.operations-list {
+  display: grid;
+  gap: 10px;
+}
+
+.operation-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: white;
+  color: #334155;
+  border: 1px solid #e5e7eb;
 }
 
 .summary-title {

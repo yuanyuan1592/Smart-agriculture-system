@@ -16,5 +16,7 @@ class Field(Base):
     crop_type = Column(String(50))  # 作物类型
     soil_moisture = Column(Float)  # 土壤湿度
     temperature = Column(Float)  # 温度
+    light_intensity = Column(Float)  # 光照强度（lux）
+    soil_ph = Column(Float)  # 土壤酸碱度 pH
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

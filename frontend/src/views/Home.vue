@@ -23,7 +23,7 @@
       <router-link to="/fields" class="feature-card">
         <span>🌱</span>
         <h3>农田监测</h3>
-        <p>查看土壤湿度、温度及健康状态。</p>
+        <p>查看土壤湿度、温度、光照与酸碱度。</p>
       </router-link>
       <router-link to="/analytics" class="feature-card">
         <span>📊</span>
@@ -45,6 +45,25 @@
         <h3>设备管理</h3>
         <p>控制灌溉、温度、农药和补光设备。</p>
       </router-link>
+    </section>
+
+    <section class="report-panel">
+      <div class="report-card">
+        <h3>今日农场执行摘要</h3>
+        <ul>
+          <li>2 块农田需要重点关注光照与 pH</li>
+          <li>1 处设备已自动触发联动控制</li>
+          <li>本日建议优先检查灌溉和补光设备</li>
+        </ul>
+      </div>
+      <div class="report-card">
+        <h3>管理重点</h3>
+        <ul>
+          <li>持续关注高温和强光时段</li>
+          <li>预防土壤酸碱度偏移</li>
+          <li>同步查看天气预报与设备状态</li>
+        </ul>
+      </div>
     </section>
 
     <section class="note-panel">
@@ -222,6 +241,31 @@ export default {
   margin: 0;
   color: #475569;
   font-size: 14px;
+}
+
+.report-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.report-card {
+  padding: 22px;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.05);
+}
+
+.report-card h3 {
+  margin: 0 0 12px;
+  color: #0f172a;
+}
+
+.report-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  line-height: 1.7;
 }
 
 .note-panel {

@@ -7,6 +7,8 @@ class FieldHistoryItem(BaseModel):
     timestamp: datetime
     soil_moisture: float
     temperature: float
+    light_intensity: float | None = None
+    soil_ph: float | None = None
 
 
 class FieldCreate(BaseModel):
@@ -17,10 +19,16 @@ class FieldCreate(BaseModel):
     crop_type: str
     soil_moisture: float
     temperature: float
+    light_intensity: Optional[float] = None
+    soil_ph: Optional[float] = None
     moisture_threshold_low: Optional[float] = None
     moisture_threshold_high: Optional[float] = None
     temperature_threshold_low: Optional[float] = None
     temperature_threshold_high: Optional[float] = None
+    light_threshold_low: Optional[float] = None
+    light_threshold_high: Optional[float] = None
+    ph_threshold_low: Optional[float] = None
+    ph_threshold_high: Optional[float] = None
 
 
 class FieldUpdate(BaseModel):
@@ -31,10 +39,16 @@ class FieldUpdate(BaseModel):
     crop_type: Optional[str] = None
     soil_moisture: Optional[float] = None
     temperature: Optional[float] = None
+    light_intensity: Optional[float] = None
+    soil_ph: Optional[float] = None
     moisture_threshold_low: Optional[float] = None
     moisture_threshold_high: Optional[float] = None
     temperature_threshold_low: Optional[float] = None
     temperature_threshold_high: Optional[float] = None
+    light_threshold_low: Optional[float] = None
+    light_threshold_high: Optional[float] = None
+    ph_threshold_low: Optional[float] = None
+    ph_threshold_high: Optional[float] = None
 
 
 class FieldResponse(BaseModel):
@@ -46,10 +60,16 @@ class FieldResponse(BaseModel):
     crop_type: str
     soil_moisture: float
     temperature: float
+    light_intensity: Optional[float] = None
+    soil_ph: Optional[float] = None
     moisture_threshold_low: float
     moisture_threshold_high: float
     temperature_threshold_low: float
     temperature_threshold_high: float
+    light_threshold_low: Optional[float] = None
+    light_threshold_high: Optional[float] = None
+    ph_threshold_low: Optional[float] = None
+    ph_threshold_high: Optional[float] = None
     last_measurement_at: datetime
     history: List[FieldHistoryItem]
     status: str

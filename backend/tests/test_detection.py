@@ -47,6 +47,29 @@ class DetectionReportTest(unittest.TestCase):
         self.assertTrue(any(item["type"] == "critical" for item in report["alerts"]))
         self.assertTrue(any(item["title"] == "土壤湿度偏低" for item in report["alerts"]))
 
+    def test_build_detection_report_includes_light_and_ph_alerts(self):
+        field_store._fields.clear()
+        field_store._fields.extend(
+            [
+                {
+                    "id": 1,
+                    "name": "光照异常田",
+                    "location": "南区",
+                    "area": 6,
+                    "crop_type": "番茄",
+                    "soil_moisture": 45,
+                    "temperature": 28,
+                    "light_intensity": 4000,
+                    "soil_ph": 8.6,
+                }
+            ]
+        )
+
+        report = build_detection_report(field_store._fields)
+
+        self.assertTrue(any("光照" in item["title"] for item in report["alerts"]))
+        self.assertTrue(any("酸碱度" in item["title"] or "酸碱" in item["title"] for item in report["alerts"]))
+
 
 if __name__ == "__main__":
     unittest.main()

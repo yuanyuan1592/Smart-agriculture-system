@@ -65,13 +65,16 @@ class AnalyticsModuleService:
         return "当前灌溉情况基本平衡，继续保持监测。"
 
     @staticmethod
-    def get_summary() -> Dict[str, Any]:
+    def get_summary(days: int = 7) -> Dict[str, Any]:
+        days = max(1, min(days, 30))
         fields = field_store.all()
         total_fields = len(fields)
         total_area = sum(field.get("area", 0) for field in fields)
         average_area = total_area / total_fields if total_fields else 0
         average_moisture = sum(field.get("soil_moisture", 0) for field in fields) / total_fields if total_fields else 0
         average_temperature = sum(field.get("temperature", 0) for field in fields) / total_fields if total_fields else 0
+        average_light = sum(field.get("light_intensity", 0) for field in fields) / total_fields if total_fields else 0
+        average_ph = sum(field.get("soil_ph", 0) for field in fields) / total_fields if total_fields else 0
 
         crop_types = {}
         for field in fields:
@@ -84,6 +87,8 @@ class AnalyticsModuleService:
             "average_area": average_area,
             "average_moisture": average_moisture,
             "average_temperature": average_temperature,
+            "average_light": average_light,
+            "average_ph": average_ph,
             "crop_distribution": crop_types,
             "growth_prediction": AnalyticsModuleService._growth_prediction(fields),
             "estimated_yield": AnalyticsModuleService._estimated_yield(fields),
@@ -91,6 +96,7 @@ class AnalyticsModuleService:
             "irrigation_advice": AnalyticsModuleService._irrigation_advice(fields),
             "irrigation_recommendation": RuleEngine.evaluate_irrigation(fields),
             "pest_risk_warnings": RuleEngine.evaluate_pest_risk(fields),
-            "trend_series": RuleEngine.build_trend_series(fields),
+            "trend_series": RuleEngine.build_trend_series(fields, days),
+            "per_field_trends": RuleEngine.build_trend_series_per_field(fields, days),
             "field_comparison": RuleEngine.build_field_comparison(fields),
         }

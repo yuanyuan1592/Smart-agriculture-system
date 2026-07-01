@@ -30,3 +30,8 @@ async def update_device(device_id: int, device: DeviceUpdate):
     if updated_device is None:
         raise HTTPException(status_code=404, detail="Device not found")
     return updated_device
+
+
+@router.get("/auto/{field_id}", response_model=List[DeviceResponse])
+async def auto_control_for_field(field_id: int):
+    return DevicesModuleService.auto_control_for_field(field_id)

@@ -5,6 +5,7 @@ import Analytics from '../modules/analytics/Analytics.vue'
 import Detection from '../modules/detection/Detection.vue'
 import Weather from '../modules/weather/Weather.vue'
 import DeviceManagement from '../modules/devices/DeviceManagement.vue'
+import FarmOperations from '../modules/farm/FarmOperations.vue'
 
 const routes = [
   {
@@ -36,6 +37,11 @@ const routes = [
     path: '/devices',
     name: 'DeviceManagement',
     component: DeviceManagement
+  },
+  {
+    path: '/farm',
+    name: 'FarmOperations',
+    component: FarmOperations
   }
 ]
 

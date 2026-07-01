@@ -7,11 +7,11 @@ export const useAnalyticsStore = defineStore('analytics', () => {
   const loading = ref(false)
   const error = ref('')
 
-  const fetchSummary = async () => {
+  const fetchSummary = async (days = 7) => {
     loading.value = true
     error.value = ''
     try {
-      const response = await api.get('/api/analytics/')
+      const response = await api.get('/api/analytics/', { params: { days } })
       summary.value = response.data
     } catch (err) {
       error.value = err.message || '获取分析数据失败'

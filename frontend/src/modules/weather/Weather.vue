@@ -22,6 +22,7 @@
             <div class="stat-item"><strong>风力</strong><span>{{ item.wind_strength }}</span></div>
             <div class="stat-item"><strong>空气质量</strong><span>{{ item.air_quality }} (AQI {{ item.aqi }})</span></div>
             <div class="stat-item"><strong>紫外线</strong><span>{{ item.uv_index }}</span></div>
+            <div class="stat-item"><strong>光照建议</strong><span>{{ item.light_advice || '正常' }}</span></div>
           </div>
 
           <div class="forecast-section">
@@ -38,13 +39,28 @@
           </div>
 
           <div class="warning-section">
+            <h4>农业天气建议</h4>
+            <div class="advice-grid">
+              <div class="advice-card">
+                <strong>灌溉建议</strong>
+                <p>{{ item.agri_advice?.irrigation || '请根据土壤情况判断' }}</p>
+              </div>
+              <div class="advice-card">
+                <strong>喷药建议</strong>
+                <p>{{ item.agri_advice?.spraying || '建议根据病虫害风险判断' }}</p>
+              </div>
+              <div class="advice-card">
+                <strong>采收建议</strong>
+                <p>{{ item.agri_advice?.harvest || '根据作物成熟度决定' }}</p>
+              </div>
+            </div>
             <h4>灾害预测</h4>
             <div v-if="item.disaster_predictions.length === 0" class="no-warning">暂无异常预警，当前环境稳定。</div>
             <div v-else class="warning-tags">
               <span v-for="warning in item.disaster_predictions" :key="warning" class="warning-tag">{{ warning }}</span>
             </div>
             <div v-if="item.disaster_predictions.length > 0" class="alert-note">
-              已自动推送到智能预警模块，相关异常会同步显示在“智能预警”页面中。
+              已自动推送到智能预警模块，相关异常会同步显示在“智能预警”页面中。若光照或温度异常，建议尽快采取补光、遮阳或保湿措施。
             </div>
           </div>
         </div>
@@ -151,6 +167,27 @@ export default defineComponent({
   padding: 16px;
   border-radius: 10px;
   background: #fff7ed;
+}
+
+.advice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.advice-card {
+  padding: 12px;
+  border-radius: 10px;
+  background: white;
+  border: 1px solid #fde68a;
+}
+
+.advice-card p {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .alert-note {

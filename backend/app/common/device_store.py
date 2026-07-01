@@ -256,6 +256,81 @@ class DeviceStore:
         for device in mock_devices:
             self.create(device)
 
+    def _build_auto_control_message(self, device: Dict[str, Any], field_data: Dict[str, Any]) -> str | None:
+        if not field_data or device.get("mode") != "auto":
+            return None
+
+        device_type = device.get("type")
+        moisture = field_data.get("soil_moisture", 0)
+        temperature = field_data.get("temperature", 0)
+        light_intensity = field_data.get("light_intensity", 0)
+        soil_ph = field_data.get("soil_ph", 0)
+        moisture_low = field_data.get("moisture_threshold_low", 30.0)
+        moisture_high = field_data.get("moisture_threshold_high", 70.0)
+        temperature_high = field_data.get("temperature_threshold_high", 35.0)
+        temperature_low = field_data.get("temperature_threshold_low", 15.0)
+        light_low = field_data.get("light_threshold_low", 8000.0)
+        light_high = field_data.get("light_threshold_high", 30000.0)
+        ph_low = field_data.get("ph_threshold_low", 6.0)
+        ph_high = field_data.get("ph_threshold_high", 7.5)
+
+        if device_type == "irrigation":
+            if moisture < moisture_low * 0.92:
+                return "土壤偏干，自动启动灌溉"
+            if moisture > moisture_high:
+                return "土壤偏湿，自动停止灌溉"
+        if device_type == "temperature":
+            if temperature > temperature_high:
+                return "温度偏高，自动启动降温"
+            if temperature < temperature_low:
+                return "温度偏低，自动启动保温"
+        if device_type == "ventilation":
+            if temperature > temperature_high or moisture > moisture_high:
+                return "环境闷热，自动开启通风"
+        if device_type == "lighting":
+            if light_intensity < light_low * 0.85:
+                return "光照不足，自动开启补光"
+            if light_intensity > light_high * 0.95:
+                return "光照过强，自动关闭补光"
+        if device_type == "nutrient":
+            if soil_ph < ph_low or soil_ph > ph_high:
+                return "土壤酸碱度异常，自动调节营养液"
+        return None
+
+    def apply_auto_control_for_field(self, field_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        if not field_data:
+            return []
+        field_id = field_data.get("id")
+        if field_id is None:
+            return []
+
+        field_devices = [device for device in self._devices if device.get("field_id") == field_id]
+        for device in field_devices:
+            message = self._build_auto_control_message(device, field_data)
+            device["auto_control_message"] = message
+            device["auto_control_active"] = bool(message)
+            if not message:
+                continue
+
+            device_type = device.get("type")
+            if device_type == "irrigation":
+                device["status"] = "on" if "启动灌溉" in message else "off"
+                device["power_level"] = 80 if device["status"] == "on" else 20
+            elif device_type == "temperature":
+                device["status"] = "on"
+                device["power_level"] = 75 if "降温" in message else 65
+            elif device_type == "ventilation":
+                device["status"] = "on"
+                device["power_level"] = 85
+            elif device_type == "lighting":
+                device["status"] = "on" if "开启补光" in message else "off"
+                device["power_level"] = 80 if device["status"] == "on" else 10
+            elif device_type == "nutrient":
+                device["status"] = "on"
+                device["power_level"] = 60
+
+        return field_devices
+
     def all(self) -> List[Dict[str, Any]]:
         return list(self._devices)
 

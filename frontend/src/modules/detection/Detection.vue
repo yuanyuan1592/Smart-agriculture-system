@@ -1,7 +1,7 @@
 <template>
   <div class="detection-page">
     <h2>农业检测</h2>
-    <p class="subtitle">根据土壤湿度和温度自动生成异常预警，帮助你快速判断农田状态。</p>
+    <p class="subtitle">根据土壤湿度、温度、光照强度和土壤酸碱度自动生成异常预警，帮助你快速判断农田状态。</p>
 
     <div v-if="detectionStore.loading" class="state">加载中...</div>
     <div v-else-if="detectionStore.error" class="state error">{{ detectionStore.error }}</div>
@@ -99,6 +99,12 @@ export default defineComponent({
       }
       if (title.includes('温度') || title.includes('高温') || title.includes('低温') || title.includes('严寒') || title.includes('极端高温')) {
         types.push('temperature')
+      }
+      if (title.includes('光照')) {
+        types.push('lighting')
+      }
+      if (title.includes('酸碱')) {
+        types.push('soil')
       }
       if (title.includes('风') || title.includes('通风')) {
         types.push('ventilation')
